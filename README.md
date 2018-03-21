@@ -1,5 +1,12 @@
 [![Travis Build](https://travis-ci.org/bluelinelabs/Conductor.svg)](https://travis-ci.org/bluelinelabs/Conductor) [![Android Arsenal](https://img.shields.io/badge/Android%20Arsenal-Conductor-brightgreen.svg?style=flat)](http://android-arsenal.com/details/1/3361) [![Javadocs](http://javadoc.io/badge/com.bluelinelabs/conductor.svg)](http://javadoc.io/doc/com.bluelinelabs/conductor)
 
+# theScore
+Custom fork of Conductor to allow for bug fixes and continued development. Be sure to run 
+```
+git remote add upstream git@github.com:bluelinelabs/Conductor.git
+```
+when cloning this project to add the upstream as a remote.
+
 # Conductor
 
 A small, yet full-featured framework that allows building View-based Android applications. Conductor provides a light-weight wrapper around standard Android Views that does just about everything you'd want:
