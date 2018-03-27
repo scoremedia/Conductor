@@ -220,8 +220,17 @@ class ControllerHostedRouter extends Router {
     @Override @NonNull
     List<Router> getSiblingRouters() {
         List<Router> list = new ArrayList<>();
+
+        if (hostController == null) return list;
+
+        Router hostRouter = hostController.getRouter();
+
         list.addAll(hostController.getChildRouters());
-        list.addAll(hostController.getRouter().getSiblingRouters());
+
+        if (hostRouter != null) {
+            list.addAll(hostRouter.getSiblingRouters());
+        }
+
         return list;
     }
 
