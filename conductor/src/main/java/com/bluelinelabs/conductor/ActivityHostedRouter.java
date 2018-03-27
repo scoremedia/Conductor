@@ -13,6 +13,7 @@ import com.bluelinelabs.conductor.ControllerChangeHandler.ControllerChangeListen
 import com.bluelinelabs.conductor.internal.LifecycleHandler;
 import com.bluelinelabs.conductor.internal.TransactionIndexer;
 
+import java.util.ArrayList;
 import java.util.List;
 
 public class ActivityHostedRouter extends Router {
@@ -117,7 +118,7 @@ public class ActivityHostedRouter extends Router {
 
     @Override @NonNull
     List<Router> getSiblingRouters() {
-        return lifecycleHandler.getRouters();
+        return lifecycleHandler != null ? lifecycleHandler.getRouters() : new ArrayList<Router>();
     }
 
     @Override @NonNull
