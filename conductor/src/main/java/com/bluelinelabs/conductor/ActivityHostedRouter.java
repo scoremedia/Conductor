@@ -98,7 +98,9 @@ public class ActivityHostedRouter extends Router {
 
     @Override
     void registerForActivityResult(@NonNull String instanceId, int requestCode) {
-        lifecycleHandler.registerForActivityResult(instanceId, requestCode);
+        if (lifecycleHandler != null) {
+            lifecycleHandler.registerForActivityResult(instanceId, requestCode);
+        }
     }
 
     @Override
