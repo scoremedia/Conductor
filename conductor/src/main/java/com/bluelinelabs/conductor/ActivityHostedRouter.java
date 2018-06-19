@@ -112,7 +112,7 @@ public class ActivityHostedRouter extends Router {
     }
 
     @Override
-    boolean hasHost() {
+    public boolean hasHost() {
         return lifecycleHandler != null;
     }
 
