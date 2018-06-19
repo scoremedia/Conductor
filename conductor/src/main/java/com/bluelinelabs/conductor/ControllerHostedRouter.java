@@ -182,7 +182,7 @@ class ControllerHostedRouter extends Router {
     }
 
     @Override
-    boolean hasHost() {
+    public boolean hasHost() {
         return hostController != null;
     }
 
@@ -239,12 +239,7 @@ class ControllerHostedRouter extends Router {
         if (hostController != null && hostController.getRouter() != null) {
             return hostController.getRouter().getRootRouter();
         } else {
-            // A ControllerHostedRouter cannot be the root, avoids StackOverflowException, lets us track our bad behaviour better
-            if (hostController != null) {
-                throw new RuntimeException(String.format("%s is orphaned from its ActivityHostedRouter", hostController.getClass().getSimpleName()));
-            } else {
-                throw new RuntimeException("ControllerHostedRouter is orphaned from its ActivityHostedRouter and has no hostController");
-            }
+            return this;
         }
     }
 

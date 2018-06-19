@@ -903,7 +903,7 @@ public abstract class Router {
     abstract void registerForActivityResult(@NonNull String instanceId, int requestCode);
     abstract void unregisterForActivityResults(@NonNull String instanceId);
     abstract void requestPermissions(@NonNull String instanceId, @NonNull String[] permissions, int requestCode);
-    abstract boolean hasHost();
+    public abstract boolean hasHost();
     @NonNull abstract List<Router> getSiblingRouters();
     @NonNull abstract Router getRootRouter();
     @Nullable abstract TransactionIndexer getTransactionIndexer();
