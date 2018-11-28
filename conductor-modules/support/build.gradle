@@ -3,7 +3,7 @@ buildscript {
         jcenter()
     }
     dependencies {
-        classpath 'de.mobilej.unmock:UnMockPlugin:0.6.0'
+        classpath 'de.mobilej.unmock:UnMockPlugin:0.6.5'
     }
 }
 
@@ -12,7 +12,6 @@ apply plugin: 'de.mobilej.unmock'
 
 android {
     compileSdkVersion rootProject.ext.compileSdkVersion
-    buildToolsVersion rootProject.ext.buildToolsVersion
 
     compileOptions {
         sourceCompatibility JavaVersion.VERSION_1_7
@@ -28,18 +27,11 @@ android {
 }
 
 dependencies {
-    testCompile rootProject.ext.junit
-    testCompile rootProject.ext.roboelectric
+    testImplementation rootProject.ext.junit
+    testImplementation rootProject.ext.roboelectric
 
-    compile rootProject.ext.supportAppCompat
-    compile project(':conductor')
-
-    unmock 'org.robolectric:android-all:4.3_r2-robolectric-0'
-}
-
-unMock {
-    keep "android.os.Bundle"
-    keep "android.os.BaseBundle"
+    implementation rootProject.ext.supportV4
+    implementation project(':conductor')
 }
 
 ext.artifactId = 'conductor-support'

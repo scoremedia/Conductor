@@ -62,22 +62,23 @@ public abstract class Controller {
 
     Bundle viewState;
     private Bundle savedInstanceState;
-    private boolean isBeingDestroyed;
+    boolean isBeingDestroyed;
     private boolean destroyed;
     private boolean attached;
     private boolean hasOptionsMenu;
     private boolean optionsMenuHidden;
-    private boolean viewIsAttached;
-    private boolean viewWasDetached;
-    private Router router;
-    private View view;
+    boolean viewIsAttached;
+    boolean viewWasDetached;
+    Router router;
+    View view;
     private Controller parentController;
-    private String instanceId;
+    String instanceId;
     private String targetInstanceId;
     private boolean needsAttach;
     private boolean attachedToUnownedParent;
+    private boolean awaitingParentAttach;
     private boolean hasSavedViewState;
-    private boolean isDetachFrozen;
+    boolean isDetachFrozen;
     private ControllerChangeHandler overriddenPushHandler;
     private ControllerChangeHandler overriddenPopHandler;
     private RetainViewMode retainViewMode = RetainViewMode.RELEASE_DETACH;
@@ -352,10 +353,8 @@ public abstract class Controller {
      */
     @NonNull
     public final List<Router> getChildRouters() {
-        List<Router> routers = new ArrayList<>();
-        for (Router router : childRouters) {
-            routers.add(router);
-        }
+        List<Router> routers = new ArrayList<>(childRouters.size());
+        routers.addAll(childRouters);
         return routers;
     }
 
@@ -846,9 +845,16 @@ public abstract class Controller {
     }
 
     final void activityStopped(@NonNull Activity activity) {
+        final boolean attached = this.attached;
+        
         if (viewAttachHandler != null) {
             viewAttachHandler.onActivityStopped();
         }
+
+        if (attached && activity.isChangingConfigurations()) {
+            needsAttach = true;
+        }
+
         onActivityStopped(activity);
     }
 
@@ -875,10 +881,17 @@ public abstract class Controller {
         }
     }
 
-    private void attach(@NonNull View view) {
+    void attach(@NonNull View view) {
         attachedToUnownedParent = router == null || view.getParent() != router.container;
         if (attachedToUnownedParent) {
             return;
+        }
+
+        if (parentController != null && !parentController.attached) {
+            awaitingParentAttach = true;
+            return;
+        } else {
+            awaitingParentAttach = false;
         }
 
         hasSavedViewState = false;
@@ -889,7 +902,7 @@ public abstract class Controller {
         }
 
         attached = true;
-        needsAttach = false;
+        needsAttach = router.isActivityStopped;
 
         onAttach(view);
 
@@ -900,6 +913,14 @@ public abstract class Controller {
         listeners = new ArrayList<>(lifecycleListeners);
         for (LifecycleListener lifecycleListener : listeners) {
             lifecycleListener.postAttach(Controller.this, view);
+        }
+
+        for (ControllerHostedRouter childRouter : childRouters) {
+            for (RouterTransaction childTransaction : childRouter.backstack) {
+                if (childTransaction.controller.awaitingParentAttach) {
+                    childTransaction.controller.attach(childTransaction.controller.view);
+                }
+            }
         }
     }
 
@@ -919,7 +940,10 @@ public abstract class Controller {
             }
 
             attached = false;
-            onDetach(view);
+
+            if (!awaitingParentAttach) {
+                onDetach(view);
+            }
 
             if (hasOptionsMenu && !optionsMenuHidden) {
                 router.invalidateOptionsMenu();
@@ -1157,7 +1181,7 @@ public abstract class Controller {
             outState.putBundle(KEY_OVERRIDDEN_POP_HANDLER, overriddenPopHandler.toBundle());
         }
 
-        ArrayList<Bundle> childBundles = new ArrayList<>();
+        ArrayList<Bundle> childBundles = new ArrayList<>(childRouters.size());
         for (ControllerHostedRouter childRouter : childRouters) {
             Bundle routerBundle = new Bundle();
             childRouter.saveInstanceState(routerBundle);

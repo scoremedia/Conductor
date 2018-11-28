@@ -1,11 +1,11 @@
 package com.bluelinelabs.conductor.demo.controllers;
 
 import android.graphics.PorterDuff.Mode;
-import android.os.Build;
 import android.os.Bundle;
 import android.support.annotation.DrawableRes;
 import android.support.annotation.NonNull;
 import android.support.v4.content.ContextCompat;
+import android.support.v4.view.ViewCompat;
 import android.support.v7.widget.GridLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
@@ -18,7 +18,7 @@ import com.bluelinelabs.conductor.RouterTransaction;
 import com.bluelinelabs.conductor.changehandler.FadeChangeHandler;
 import com.bluelinelabs.conductor.changehandler.TransitionChangeHandlerCompat;
 import com.bluelinelabs.conductor.demo.R;
-import com.bluelinelabs.conductor.demo.changehandler.SharedElementDelayingChangeHandler;
+import com.bluelinelabs.conductor.demo.changehandler.CityGridSharedElementTransitionChangeHandler;
 import com.bluelinelabs.conductor.demo.controllers.base.BaseController;
 import com.bluelinelabs.conductor.demo.util.BundleBuilder;
 
@@ -79,10 +79,8 @@ public class CityGridController extends BaseController {
         tvTitle.setText(title);
         imgDot.getDrawable().setColorFilter(ContextCompat.getColor(getActivity(), dotColor), Mode.SRC_ATOP);
 
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
-            tvTitle.setTransitionName(getResources().getString(R.string.transition_tag_title_indexed, fromPosition));
-            imgDot.setTransitionName(getResources().getString(R.string.transition_tag_dot_indexed, fromPosition));
-        }
+        ViewCompat.setTransitionName(tvTitle, getResources().getString(R.string.transition_tag_title_indexed, fromPosition));
+        ViewCompat.setTransitionName(imgDot, getResources().getString(R.string.transition_tag_dot_indexed, fromPosition));
 
         recyclerView.setHasFixedSize(true);
         recyclerView.setLayoutManager(new GridLayoutManager(view.getContext(), 2));
@@ -103,8 +101,8 @@ public class CityGridController extends BaseController {
         names.add(titleTransitionName);
 
         getRouter().pushController(RouterTransaction.with(new CityDetailController(model.drawableRes, model.title))
-                .pushChangeHandler(new TransitionChangeHandlerCompat(new SharedElementDelayingChangeHandler(names), new FadeChangeHandler()))
-                .popChangeHandler(new TransitionChangeHandlerCompat(new SharedElementDelayingChangeHandler(names), new FadeChangeHandler())));
+                .pushChangeHandler(new TransitionChangeHandlerCompat(new CityGridSharedElementTransitionChangeHandler(names), new FadeChangeHandler()))
+                .popChangeHandler(new TransitionChangeHandlerCompat(new CityGridSharedElementTransitionChangeHandler(names), new FadeChangeHandler())));
     }
 
     class CityGridAdapter extends RecyclerView.Adapter<CityGridAdapter.ViewHolder> {
@@ -148,10 +146,8 @@ public class CityGridController extends BaseController {
                 imageView.setImageResource(item.drawableRes);
                 textView.setText(item.title);
 
-                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
-                    textView.setTransitionName(getResources().getString(R.string.transition_tag_title_named, model.title));
-                    imageView.setTransitionName(getResources().getString(R.string.transition_tag_image_named, model.title));
-                }
+                ViewCompat.setTransitionName(textView, getResources().getString(R.string.transition_tag_title_named, model.title));
+                ViewCompat.setTransitionName(imageView, getResources().getString(R.string.transition_tag_image_named, model.title));
             }
 
             @OnClick(R.id.row_root)

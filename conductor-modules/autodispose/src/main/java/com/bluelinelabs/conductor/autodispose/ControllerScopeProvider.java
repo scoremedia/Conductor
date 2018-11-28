@@ -11,10 +11,10 @@ import io.reactivex.functions.Function;
 import io.reactivex.subjects.BehaviorSubject;
 
 public class ControllerScopeProvider implements LifecycleScopeProvider<ControllerEvent> {
-    private static final Function<ControllerEvent, ControllerEvent> CORRESPONDING_EVENTS =
-            new Function<ControllerEvent, ControllerEvent>() {
+    private static final CorrespondingEventsFunction CORRESPONDING_EVENTS =
+            new CorrespondingEventsFunction() {
                 @Override
-                public ControllerEvent apply(ControllerEvent lastEvent) throws Exception {
+                public ControllerEvent apply(ControllerEvent lastEvent) throws OutsideLifecycleException {
                     switch (lastEvent) {
                         case CREATE:
                             return ControllerEvent.DESTROY;
@@ -33,13 +33,28 @@ public class ControllerScopeProvider implements LifecycleScopeProvider<Controlle
             };
 
     @NonNull private final BehaviorSubject<ControllerEvent> lifecycleSubject;
+    @NonNull private final Function<ControllerEvent, ControllerEvent> correspondingEventsFunction;
 
     public static ControllerScopeProvider from(@NonNull Controller controller) {
-        return new ControllerScopeProvider(controller);
+        return new ControllerScopeProvider(controller, CORRESPONDING_EVENTS);
     }
 
-    private ControllerScopeProvider(@NonNull Controller controller) {
+    public static ControllerScopeProvider from(@NonNull Controller controller, @NonNull final ControllerEvent untilEvent) {
+        return new ControllerScopeProvider(controller, new CorrespondingEventsFunction() {
+            @Override
+            public ControllerEvent apply(ControllerEvent controllerEvent) {
+                return untilEvent;
+            }
+        });
+    }
+
+    public static ControllerScopeProvider from(@NonNull Controller controller, @NonNull final CorrespondingEventsFunction correspondingEventsFunction) {
+        return new ControllerScopeProvider(controller, correspondingEventsFunction);
+    }
+
+    private ControllerScopeProvider(@NonNull Controller controller, @NonNull CorrespondingEventsFunction correspondingEventsFunction) {
         lifecycleSubject = ControllerLifecycleSubjectHelper.create(controller);
+        this.correspondingEventsFunction = correspondingEventsFunction;
     }
 
     @Override
@@ -49,7 +64,7 @@ public class ControllerScopeProvider implements LifecycleScopeProvider<Controlle
 
     @Override
     public Function<ControllerEvent, ControllerEvent> correspondingEvents() {
-        return CORRESPONDING_EVENTS;
+        return correspondingEventsFunction;
     }
 
     @Override

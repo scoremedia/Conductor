@@ -1,7 +1,10 @@
 package com.bluelinelabs.conductor;
 
+import android.support.annotation.NonNull;
+import android.view.View;
 import android.view.ViewGroup;
 
+import com.bluelinelabs.conductor.Controller.LifecycleListener;
 import com.bluelinelabs.conductor.changehandler.FadeChangeHandler;
 import com.bluelinelabs.conductor.changehandler.HorizontalChangeHandler;
 import com.bluelinelabs.conductor.util.ActivityProxy;
@@ -123,6 +126,31 @@ public class RouterTests {
 
         assertNull(router.getControllerWithTag(controller1Tag));
         assertNull(router.getControllerWithTag(controller2Tag));
+    }
+
+    @Test
+    public void testPopControllerConcurrentModificationException() {
+        int step = 1;
+        for (int i = 0; i < 10; i++, step++) {
+            router.pushController(RouterTransaction.with(new TestController()).tag("1"));
+            router.pushController(RouterTransaction.with(new TestController()).tag("2"));
+            router.pushController(RouterTransaction.with(new TestController()).tag("3"));
+
+            String tag;
+            if (step == 1) {
+                tag = "1";
+            } else if (step == 2) {
+                tag = "2";
+            } else {
+                tag = "3";
+                step = 0;
+            }
+            Controller controller = router.getControllerWithTag(tag);
+            if (controller != null) {
+                router.popController(controller);
+            }
+            router.popToRoot();
+        }
     }
 
     @Test
@@ -429,6 +457,39 @@ public class RouterTests {
         router.destroy(true);
 
         assertEquals(0, router.container.getChildCount());
+    }
+
+    @Test
+    public void testIsBeingDestroyed() {
+        final LifecycleListener lifecycleListener = new LifecycleListener() {
+            @Override
+            public void preDestroyView(@NonNull Controller controller, @NonNull View view) {
+                assertTrue(controller.isBeingDestroyed());
+            }
+        };
+
+        Controller controller1 = new TestController();
+        Controller controller2 = new TestController();
+        controller2.addLifecycleListener(lifecycleListener);
+
+        router.setRoot(RouterTransaction.with(controller1));
+        router.pushController(RouterTransaction.with(controller2));
+        assertFalse(controller1.isBeingDestroyed());
+        assertFalse(controller2.isBeingDestroyed());
+
+        router.popCurrentController();
+        assertFalse(controller1.isBeingDestroyed());
+        assertTrue(controller2.isBeingDestroyed());
+
+        Controller controller3 = new TestController();
+        controller3.addLifecycleListener(lifecycleListener);
+        router.pushController(RouterTransaction.with(controller3));
+        assertFalse(controller1.isBeingDestroyed());
+        assertFalse(controller3.isBeingDestroyed());
+
+        router.popToRoot();
+        assertFalse(controller1.isBeingDestroyed());
+        assertTrue(controller3.isBeingDestroyed());
     }
 
 }

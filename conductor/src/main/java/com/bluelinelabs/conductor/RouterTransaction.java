@@ -108,11 +108,8 @@ public class RouterTransaction {
         }
     }
 
-    void ensureValidIndex(@Nullable TransactionIndexer indexer) {
-        if (indexer == null) {
-            throw new RuntimeException();
-        }
-        if (transactionIndex == INVALID_INDEX && indexer != null) {
+    void ensureValidIndex(@NonNull TransactionIndexer indexer) {
+        if (transactionIndex == INVALID_INDEX) {
             transactionIndex = indexer.nextIndex();
         }
     }

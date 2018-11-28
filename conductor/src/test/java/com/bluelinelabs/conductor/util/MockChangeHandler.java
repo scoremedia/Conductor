@@ -34,6 +34,10 @@ public class MockChangeHandler extends ControllerChangeHandler {
         return new MockChangeHandler(false, null, null);
     }
 
+    public static MockChangeHandler noRemoveViewOnPushHandler(String tag) {
+        return new MockChangeHandler(false, tag, null);
+    }
+
     public static MockChangeHandler listeningChangeHandler(@NonNull ChangeHandlerListener listener) {
         return new MockChangeHandler(true, null, listener);
     }
@@ -48,6 +52,7 @@ public class MockChangeHandler extends ControllerChangeHandler {
 
     private MockChangeHandler(boolean removesFromViewOnPush, String tag, ChangeHandlerListener listener) {
         this.removesFromViewOnPush = removesFromViewOnPush;
+        this.tag = tag;
 
         if (listener == null) {
             this.listener = new ChangeHandlerListener() { };

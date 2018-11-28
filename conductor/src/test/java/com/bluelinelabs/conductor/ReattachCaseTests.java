@@ -232,6 +232,31 @@ public class ReattachCaseTests {
         assertFalse(childController.isAttached());
     }
 
+    // Attempt to test https://github.com/bluelinelabs/Conductor/issues/367
+    @Test
+    public void testViewIsAttachedAfterStartedActivityIsRecreated() {
+        Controller controller1 = new TestController();
+        Controller controller2 = new TestController();
+
+        router.setRoot(RouterTransaction.with(controller1));
+        assertTrue(controller1.isAttached());
+
+        // Lock screen
+        Bundle bundle = new Bundle();
+        activityProxy.pause().saveInstanceState(bundle).stop(false);
+
+        // Push a 2nd controller, which will rotate the screen once it unlocked
+        router.pushController(RouterTransaction.with(controller2));
+        assertTrue(controller2.isAttached());
+        assertTrue(controller2.getNeedsAttach());
+
+        // Unlock screen and rotate
+        activityProxy.start();
+        activityProxy.rotate();
+
+        assertTrue(controller2.isAttached());
+    }
+
     private void sleepWakeDevice() {
         activityProxy.saveInstanceState(new Bundle()).pause();
         activityProxy.resume();
