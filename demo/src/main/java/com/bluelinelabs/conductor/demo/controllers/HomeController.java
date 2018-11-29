@@ -3,11 +3,11 @@ package com.bluelinelabs.conductor.demo.controllers;
 import android.content.Intent;
 import android.graphics.PorterDuff.Mode;
 import android.net.Uri;
-import android.os.Build;
 import android.os.Bundle;
 import android.support.annotation.ColorRes;
 import android.support.annotation.NonNull;
 import android.support.v4.content.ContextCompat;
+import android.support.v4.view.ViewCompat;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.text.SpannableString;
@@ -31,7 +31,7 @@ import com.bluelinelabs.conductor.changehandler.FadeChangeHandler;
 import com.bluelinelabs.conductor.changehandler.HorizontalChangeHandler;
 import com.bluelinelabs.conductor.changehandler.TransitionChangeHandlerCompat;
 import com.bluelinelabs.conductor.demo.R;
-import com.bluelinelabs.conductor.demo.changehandler.ArcFadeMoveChangeHandler;
+import com.bluelinelabs.conductor.demo.changehandler.ArcFadeMoveChangeHandlerCompat;
 import com.bluelinelabs.conductor.demo.changehandler.FabToDialogTransitionChangeHandler;
 import com.bluelinelabs.conductor.demo.controllers.NavigationDemoController.DisplayUpMode;
 import com.bluelinelabs.conductor.demo.controllers.base.BaseController;
@@ -192,9 +192,12 @@ public class HomeController extends BaseController {
                         .popChangeHandler(new FadeChangeHandler()));
                 break;
             case SHARED_ELEMENT_TRANSITIONS:
+                String titleSharedElementName = getResources().getString(R.string.transition_tag_title_indexed, position);
+                String dotSharedElementName = getResources().getString(R.string.transition_tag_dot_indexed, position);
+
                 getRouter().pushController(RouterTransaction.with(new CityGridController(model.title, model.color, position))
-                        .pushChangeHandler(new TransitionChangeHandlerCompat(new ArcFadeMoveChangeHandler(), new FadeChangeHandler()))
-                        .popChangeHandler(new TransitionChangeHandlerCompat(new ArcFadeMoveChangeHandler(), new FadeChangeHandler())));
+                        .pushChangeHandler(new ArcFadeMoveChangeHandlerCompat(titleSharedElementName, dotSharedElementName))
+                        .popChangeHandler(new ArcFadeMoveChangeHandlerCompat(titleSharedElementName, dotSharedElementName)));
                 break;
             case DRAG_DISMISS:
                 getRouter().pushController(RouterTransaction.with(new DragDismissController())
@@ -262,10 +265,8 @@ public class HomeController extends BaseController {
                 imgDot.getDrawable().setColorFilter(ContextCompat.getColor(getActivity(), item.color), Mode.SRC_ATOP);
                 this.position = position;
 
-                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
-                    tvTitle.setTransitionName(getResources().getString(R.string.transition_tag_title_indexed, position));
-                    imgDot.setTransitionName(getResources().getString(R.string.transition_tag_dot_indexed, position));
-                }
+                ViewCompat.setTransitionName(tvTitle, getResources().getString(R.string.transition_tag_title_indexed, position));
+                ViewCompat.setTransitionName(imgDot, getResources().getString(R.string.transition_tag_dot_indexed, position));
             }
 
             @OnClick(R.id.row_root)

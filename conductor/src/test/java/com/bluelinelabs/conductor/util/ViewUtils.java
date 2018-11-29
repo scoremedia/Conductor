@@ -16,7 +16,7 @@ public class ViewUtils {
 
     public static void reportAttached(View view, boolean attached, boolean propogateToChildren) {
         if (view instanceof AttachFakingFrameLayout) {
-            ((AttachFakingFrameLayout)view).setAttached(attached, false);
+            ((AttachFakingFrameLayout) view).setAttached(attached, false);
         }
 
         List<OnAttachStateChangeListener> listeners = getAttachStateListeners(view);
@@ -44,7 +44,7 @@ public class ViewUtils {
         }
 
         if (propogateToChildren && view instanceof ViewGroup) {
-            ViewGroup viewGroup = (ViewGroup)view;
+            ViewGroup viewGroup = (ViewGroup) view;
             int childCount = viewGroup.getChildCount();
             for (int i = 0; i < childCount; i++) {
                 reportAttached(viewGroup.getChildAt(i), attached, true);

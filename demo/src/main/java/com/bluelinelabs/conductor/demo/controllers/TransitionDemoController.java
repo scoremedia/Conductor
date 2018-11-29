@@ -128,9 +128,9 @@ public class TransitionDemoController extends BaseController {
             case FLIP:
                 return new FlipChangeHandler();
             case ARC_FADE:
-                return new ArcFadeMoveChangeHandlerCompat();
+                return new ArcFadeMoveChangeHandlerCompat(from.getResources().getString(R.string.transition_tag_dot), from.getResources().getString(R.string.transition_tag_title));
             case ARC_FADE_RESET:
-                return new ArcFadeMoveChangeHandlerCompat();
+                return new ArcFadeMoveChangeHandlerCompat(from.getResources().getString(R.string.transition_tag_dot), from.getResources().getString(R.string.transition_tag_title));
             case HORIZONTAL:
                 return new HorizontalChangeHandler();
             default:

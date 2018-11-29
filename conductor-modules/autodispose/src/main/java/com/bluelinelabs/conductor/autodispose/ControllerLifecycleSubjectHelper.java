@@ -13,7 +13,7 @@ public class ControllerLifecycleSubjectHelper {
     private ControllerLifecycleSubjectHelper() { }
 
     @NonNull
-    public static BehaviorSubject<ControllerEvent> create(Controller controller) {
+    public static BehaviorSubject<ControllerEvent> create(@NonNull Controller controller) {
         ControllerEvent initialState;
         if (controller.isBeingDestroyed() || controller.isDestroyed()) {
             throw new OutsideLifecycleException("Cannot bind to Controller lifecycle when outside of it.");

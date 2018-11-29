@@ -10,7 +10,7 @@ import com.bluelinelabs.conductor.Controller;
 
 public class TestController extends Controller {
 
-    @NonNull @Override
+    @Override @NonNull
     protected View onCreateView(@NonNull LayoutInflater inflater, @NonNull ViewGroup container) {
         return new FrameLayout(inflater.getContext());
     }

@@ -7,6 +7,8 @@ import android.view.View;
 import android.view.ViewGroup;
 
 import com.bluelinelabs.conductor.Controller.LifecycleListener;
+import com.bluelinelabs.conductor.Controller.RetainViewMode;
+import com.bluelinelabs.conductor.changehandler.SimpleSwapChangeHandler;
 import com.bluelinelabs.conductor.util.ActivityProxy;
 import com.bluelinelabs.conductor.util.CallState;
 import com.bluelinelabs.conductor.util.MockChangeHandler;
@@ -21,8 +23,10 @@ import org.robolectric.RobolectricTestRunner;
 import org.robolectric.annotation.Config;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
+import static org.junit.Assert.assertTrue;
 
 @RunWith(RobolectricTestRunner.class)
 @Config(manifest = Config.NONE)
@@ -497,6 +501,38 @@ public class ControllerLifecycleCallbacksTests {
         expectedCallState.destroyCalls++;
 
         assertCalls(expectedCallState, child);
+    }
+
+    @Test
+    public void testChildLifecycleOrderingAfterUnexpectedAttach() {
+        Controller parent = new TestController();
+        parent.setRetainViewMode(RetainViewMode.RETAIN_DETACH);
+        router.pushController(RouterTransaction.with(parent)
+                .pushChangeHandler(MockChangeHandler.defaultHandler())
+                .popChangeHandler(MockChangeHandler.defaultHandler()));
+
+        TestController child = new TestController();
+        child.setRetainViewMode(RetainViewMode.RETAIN_DETACH);
+        Router childRouter = parent.getChildRouter((ViewGroup)parent.getView().findViewById(TestController.VIEW_ID));
+        childRouter
+                .setRoot(RouterTransaction.with(child)
+                        .pushChangeHandler(new SimpleSwapChangeHandler())
+                        .popChangeHandler(new SimpleSwapChangeHandler()));
+
+        assertTrue(parent.isAttached());
+        assertTrue(child.isAttached());
+
+        ViewUtils.reportAttached(parent.getView(), false, true);
+        assertFalse(parent.isAttached());
+        assertFalse(child.isAttached());
+
+        ViewUtils.reportAttached(child.getView(), true);
+        assertFalse(parent.isAttached());
+        assertFalse(child.isAttached());
+
+        ViewUtils.reportAttached(parent.getView(), true);
+        assertTrue(parent.isAttached());
+        assertTrue(child.isAttached());
     }
 
     private MockChangeHandler getPushHandler(final CallState expectedCallState, final TestController controller) {

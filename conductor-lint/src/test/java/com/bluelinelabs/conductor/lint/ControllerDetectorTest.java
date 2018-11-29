@@ -1,19 +1,13 @@
 package com.bluelinelabs.conductor.lint;
 
-import com.android.tools.lint.checks.infrastructure.LintDetectorTest;
-import com.android.tools.lint.detector.api.Detector;
-import com.android.tools.lint.detector.api.Issue;
-
 import org.intellij.lang.annotations.Language;
+import org.junit.Test;
 
-import java.util.Collections;
-import java.util.List;
+import static com.android.tools.lint.checks.infrastructure.TestFiles.java;
+import static com.android.tools.lint.checks.infrastructure.TestLintTask.lint;
 
-import static com.google.common.truth.Truth.assertThat;
+public class ControllerDetectorTest {
 
-public class ControllerDetectorTest extends LintDetectorTest {
-
-    private static final String NO_WARNINGS = "No warnings.";
     private static final String CONSTRUCTOR_ERROR =
             "src/test/SampleController.java:2: Error: This Controller needs to have either a public default constructor or a public single-argument constructor that takes a Bundle. (test.SampleController) [ValidController]\n"
             + "public class SampleController extends com.bluelinelabs.conductor.Controller {\n"
@@ -25,72 +19,94 @@ public class ControllerDetectorTest extends LintDetectorTest {
                     + "^\n"
                     + "1 errors, 0 warnings\n";
 
-    public void testWithNoConstructor() throws Exception {
+    @Test
+    public void testWithNoConstructor() {
         @Language("JAVA") String source = ""
                 + "package test;\n"
                 + "public class SampleController extends com.bluelinelabs.conductor.Controller {\n"
                 + "}";
-        assertThat(lintProject(java(source))).isEqualTo(NO_WARNINGS);
+
+        lint()
+                .files(java(source))
+                .issues(ControllerIssueDetector.ISSUE, ControllerChangeHandlerIssueDetector.ISSUE)
+                .run()
+                .expectClean();
     }
 
-    public void testWithEmptyConstructor() throws Exception {
+    @Test
+    public void testWithEmptyConstructor() {
         @Language("JAVA") String source = ""
                 + "package test;\n"
                 + "public class SampleController extends com.bluelinelabs.conductor.Controller {\n"
                 + "    public SampleController() { }\n"
                 + "}";
-        assertThat(lintProject(java(source))).isEqualTo(NO_WARNINGS);
+
+        lint()
+                .files(java(source))
+                .issues(ControllerIssueDetector.ISSUE, ControllerChangeHandlerIssueDetector.ISSUE)
+                .run()
+                .expectClean();
     }
 
-    public void testWithInvalidConstructor() throws Exception {
+    @Test
+    public void testWithInvalidConstructor() {
         @Language("JAVA") String source = ""
                 + "package test;\n"
                 + "public class SampleController extends com.bluelinelabs.conductor.Controller {\n"
                 + "    public SampleController(int number) { }\n"
                 + "}";
-        assertThat(lintProject(java(source))).isEqualTo(CONSTRUCTOR_ERROR);
+
+        lint()
+                .files(java(source))
+                .issues(ControllerIssueDetector.ISSUE, ControllerChangeHandlerIssueDetector.ISSUE)
+                .run()
+                .expect(CONSTRUCTOR_ERROR);
     }
 
-    public void testWithEmptyAndInvalidConstructor() throws Exception {
+    @Test
+    public void testWithEmptyAndInvalidConstructor() {
         @Language("JAVA") String source = ""
                 + "package test;\n"
                 + "public class SampleController extends com.bluelinelabs.conductor.Controller {\n"
                 + "    public SampleController() { }\n"
                 + "    public SampleController(int number) { }\n"
                 + "}";
-        assertThat(lintProject(java(source))).isEqualTo(NO_WARNINGS);
+
+        lint()
+                .files(java(source))
+                .issues(ControllerIssueDetector.ISSUE, ControllerChangeHandlerIssueDetector.ISSUE)
+                .run()
+                .expectClean();
     }
 
-    public void testWithPrivateConstructor() throws Exception {
+    @Test
+    public void testWithPrivateConstructor() {
         @Language("JAVA") String source = ""
                 + "package test;\n"
                 + "public class SampleController extends com.bluelinelabs.conductor.Controller {\n"
                 + "    private SampleController() { }\n"
                 + "}";
-        assertThat(lintProject(java(source))).isEqualTo(CONSTRUCTOR_ERROR);
+
+        lint()
+                .files(java(source))
+                .issues(ControllerIssueDetector.ISSUE, ControllerChangeHandlerIssueDetector.ISSUE)
+                .run()
+                .expect(CONSTRUCTOR_ERROR);
     }
 
-    public void testWithPrivateClass() throws Exception {
+    @Test
+    public void testWithPrivateClass() {
         @Language("JAVA") String source = ""
                 + "package test;\n"
                 + "private class SampleController extends com.bluelinelabs.conductor.Controller {\n"
                 + "    public SampleController() { }\n"
                 + "}";
-        assertThat(lintProject(java(source))).isEqualTo(CLASS_ERROR);
+
+        lint()
+                .files(java(source))
+                .issues(ControllerIssueDetector.ISSUE, ControllerChangeHandlerIssueDetector.ISSUE)
+                .run()
+                .expect(CLASS_ERROR);
     }
 
-    @Override
-    protected Detector getDetector() {
-        return new ControllerIssueDetector();
-    }
-
-    @Override
-    protected List<Issue> getIssues() {
-        return Collections.singletonList(ControllerIssueDetector.ISSUE);
-    }
-
-    @Override
-    protected boolean allowCompilationErrors() {
-        return true;
-    }
 }

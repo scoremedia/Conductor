@@ -12,6 +12,9 @@ import android.view.ViewGroup;
 import com.bluelinelabs.conductor.ControllerChangeHandler;
 
 /**
+ * @deprecated It's very rare that a simple AutoTransition is what you want when changing controllers. This class
+ * is deprecated simply because it was often a red herring for people trying to make nice transitions.
+ *
  * A change handler that will use an AutoTransition.
  */
 @TargetApi(Build.VERSION_CODES.LOLLIPOP)

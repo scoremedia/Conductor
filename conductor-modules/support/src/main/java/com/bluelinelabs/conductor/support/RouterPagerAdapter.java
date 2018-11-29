@@ -30,6 +30,7 @@ public abstract class RouterPagerAdapter extends PagerAdapter {
     private SparseArray<Bundle> savedPages = new SparseArray<>();
     private SparseArray<Router> visibleRouters = new SparseArray<>();
     private ArrayList<Integer> savedPageHistory = new ArrayList<>();
+    private Router currentPrimaryRouter;
 
     /**
      * Creates a new RouterPagerAdapter using the passed host.
@@ -71,11 +72,18 @@ public abstract class RouterPagerAdapter extends PagerAdapter {
             if (routerSavedState != null) {
                 router.restoreInstanceState(routerSavedState);
                 savedPages.remove(position);
+                savedPageHistory.remove((Integer) position);
             }
         }
 
         router.rebindIfNeeded();
         configureRouter(router, position);
+
+        if (router != currentPrimaryRouter) {
+            for (RouterTransaction transaction : router.getBackstack()) {
+                transaction.controller().setOptionsMenuHidden(true);
+            }
+        }
 
         visibleRouters.put(position, router);
         return router;
@@ -89,7 +97,7 @@ public abstract class RouterPagerAdapter extends PagerAdapter {
         router.saveInstanceState(savedState);
         savedPages.put(position, savedState);
 
-        savedPageHistory.remove((Integer)position);
+        savedPageHistory.remove((Integer) position);
         savedPageHistory.add(position);
 
         ensurePagesSaved();
@@ -97,6 +105,24 @@ public abstract class RouterPagerAdapter extends PagerAdapter {
         host.removeChildRouter(router);
 
         visibleRouters.remove(position);
+    }
+
+    @Override
+    public void setPrimaryItem(ViewGroup container, int position, Object object) {
+        Router router = (Router)object;
+        if (router != currentPrimaryRouter) {
+            if (currentPrimaryRouter != null) {
+                for (RouterTransaction transaction : currentPrimaryRouter.getBackstack()) {
+                    transaction.controller().setOptionsMenuHidden(true);
+                }
+            }
+            if (router != null) {
+                for (RouterTransaction transaction : router.getBackstack()) {
+                    transaction.controller().setOptionsMenuHidden(false);
+                }
+            }
+            currentPrimaryRouter = router;
+        }
     }
 
     @Override

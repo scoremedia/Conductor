@@ -67,10 +67,6 @@ class Backstack implements Iterable<RouterTransaction> {
         return backstack.peek();
     }
 
-    void remove(@NonNull RouterTransaction transaction) {
-        backstack.removeFirstOccurrence(transaction);
-    }
-
     void push(@NonNull RouterTransaction transaction) {
         backstack.push(transaction);
     }
@@ -85,28 +81,19 @@ class Backstack implements Iterable<RouterTransaction> {
     }
 
     void setBackstack(@NonNull List<RouterTransaction> backstack) {
-        for (RouterTransaction existingTransaction : this.backstack) {
-            boolean contains = false;
-            for (RouterTransaction newTransaction : backstack) {
-                if (existingTransaction.controller == newTransaction.controller) {
-                    contains = true;
-                    break;
-                }
-            }
-
-            if (!contains) {
-                existingTransaction.controller.destroy();
-            }
-        }
-
         this.backstack.clear();
         for (RouterTransaction transaction : backstack) {
             this.backstack.push(transaction);
         }
     }
 
-    boolean contains(@NonNull RouterTransaction transaction) {
-        return backstack.contains(transaction);
+    boolean contains(@NonNull Controller controller) {
+        for (RouterTransaction transaction : backstack) {
+            if (controller == transaction.controller) {
+                return true;
+            }
+        }
+        return false;
     }
 
     void saveInstanceState(@NonNull Bundle outState) {

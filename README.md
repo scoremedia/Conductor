@@ -27,35 +27,34 @@ Conductor is architecture-agnostic and does not try to force any design decision
 ## Installation
 
 ```gradle
-compile 'com.bluelinelabs:conductor:2.1.4'
+implementation 'com.bluelinelabs:conductor:2.1.5'
 
 // If you want the components that go along with
 // Android's support libraries (currently just a PagerAdapter):
-compile 'com.bluelinelabs:conductor-support:2.1.4'
+implementation 'com.bluelinelabs:conductor-support:2.1.5'
 
 // If you want RxJava lifecycle support:
-compile 'com.bluelinelabs:conductor-rxlifecycle:2.1.4'
+implementation 'com.bluelinelabs:conductor-rxlifecycle:2.1.5'
 
 // If you want RxJava2 lifecycle support:
-compile 'com.bluelinelabs:conductor-rxlifecycle2:2.1.4'
+implementation 'com.bluelinelabs:conductor-rxlifecycle2:2.1.5'
 
 // If you want RxJava2 Autodispose support:
-compile 'com.bluelinelabs:conductor-autodispose:2.1.4'
+implementation 'com.bluelinelabs:conductor-autodispose:2.1.5'
 
 // If you want Controllers that are Lifecycle-aware (architecture components):
-compile 'com.bluelinelabs:conductor-arch-components-lifecycle:0.1.1'
+implementation 'com.bluelinelabs:conductor-archlifecycle:2.1.5'
 ```
 
-SNAPSHOT:
+**SNAPSHOT**
 
-Just use `2.1.5-SNAPSHOT` as your version number in any of the above dependencies and add the url to the snapshot repository:
+Just use `2.1.6-SNAPSHOT` as your version number in any of the dependencies above and add the url to the snapshot repository:
 
 ```gradle
 allprojects {
   repositories {
-    ...
-
     maven { url "https://oss.sonatype.org/content/repositories/snapshots/" }
+  }
 }
 ```
 
@@ -83,7 +82,7 @@ public class MainActivity extends Activity {
 
         setContentView(R.layout.activity_main);
 
-        ViewGroup container = (ViewGroup)findViewById(R.id.controller_container);
+        ViewGroup container = (ViewGroup) findViewById(R.id.controller_container);
 
         router = Conductor.attachRouter(this, container, savedInstanceState);
         if (!router.hasRootController()) {
@@ -109,7 +108,7 @@ public class HomeController extends Controller {
     @Override
     protected View onCreateView(@NonNull LayoutInflater inflater, @NonNull ViewGroup container) {
         View view = inflater.inflate(R.layout.controller_home, container, false);
-        ((TextView)view.findViewById(R.id.tv_title)).setText("Hello World");
+        ((TextView) view.findViewById(R.id.tv_title)).setText("Hello World");
         return view;
     }
 
@@ -138,7 +137,7 @@ The lifecycle of a Controller is significantly simpler to understand than that o
 `getChildRouter` can be called on a `Controller` in order to get a nested `Router` into which child `Controller`s can be pushed. This enables creating advanced layouts, such as Master/Detail.
 
 ### RxJava Lifecycle
-If the RxLifecycle dependency has been added, there is an `RxController` available that can be used along with the standard [RxLifecycle library](https://github.com/trello/RxLifecycle). There is also a `ControllerLifecycleProvider` available if you do not wish to use this subclass.
+If the AutoDispose dependency has been added, there is a `ControllerScopeProvider` available that can be used along with the standard [AutoDispose library](https://github.com/uber/AutoDispose).
 
 ## License
 ```
