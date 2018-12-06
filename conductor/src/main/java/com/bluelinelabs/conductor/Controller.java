@@ -881,7 +881,12 @@ public abstract class Controller {
         }
     }
 
-    void attach(@NonNull View view) {
+    void attach(@Nullable View view) {
+
+        if (view == null) {
+            return;
+        }
+
         attachedToUnownedParent = router == null || view.getParent() != router.container;
         if (attachedToUnownedParent) {
             return;
